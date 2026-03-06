@@ -1,0 +1,227 @@
+import { NextResponse } from "next/server"
+
+// Ensure this route runs on Node.js runtime
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
+// Import cloudinary
+import { v2 as cloudinary } from "cloudinary"
+
+// Wrap everything in a safety function to ensure JSON responses
+async function handleUpload(request: Request) {
+  try {
+    // Read environment variables FRESH on every request
+    const rawCloudName = process.env.CLOUDINARY_CLOUD_NAME
+    let cloudName = rawCloudName?.trim() || ''
+    
+    // FORCE the correct value if it's wrong (temporary fix)
+    if (cloudName === 'Financial' || !cloudName) {
+      console.warn('WARNING: Detected wrong or missing cloud_name, forcing correct value')
+      cloudName = 'dudgqptv4'
+    }
+    
+    const apiKey = process.env.CLOUDINARY_API_KEY?.trim() || ''
+    const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim() || ''
+
+    // Check if Cloudinary is properly configured
+    if (!cloudName || !apiKey || !apiSecret) {
+      console.error('ERROR: Missing Cloudinary credentials')
+      console.error('cloudName:', cloudName ? 'EXISTS' : 'MISSING')
+      console.error('apiKey:', apiKey ? 'EXISTS' : 'MISSING')
+      console.error('apiSecret:', apiSecret ? 'EXISTS' : 'MISSING')
+      return NextResponse.json(
+        { 
+          error: 'Image upload service is not configured. Please check Cloudinary environment variables.',
+          details: 'Missing CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, or CLOUDINARY_API_SECRET in production environment.'
+        },
+        { status: 503 }
+      )
+    }
+
+    // Configure Cloudinary FRESH on every request (no caching)
+    try {
+      cloudinary.config({
+        cloud_name: cloudName,
+        api_key: apiKey,
+        api_secret: apiSecret,
+      })
+    } catch (configError: any) {
+      console.error('Cloudinary config error:', configError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to configure Cloudinary',
+          details: configError?.message || 'Configuration error'
+        },
+        { status: 500 }
+      )
+    }
+
+    // Parse form data
+    let form: FormData
+    try {
+      form = await request.formData()
+    } catch (formError: any) {
+      console.error('Form parsing error:', formError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to parse form data',
+          details: formError?.message || 'Invalid request format'
+        },
+        { status: 400 }
+      )
+    }
+
+    const file = form.get('file') as File | null
+    if (!file) {
+      return NextResponse.json({ error: 'file is required' }, { status: 400 })
+    }
+
+    // Convert file to buffer
+    let buffer: Buffer
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      buffer = Buffer.from(arrayBuffer)
+    } catch (bufferError: any) {
+      console.error('Buffer conversion error:', bufferError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to process file',
+          details: bufferError?.message || 'File processing error'
+        },
+        { status: 400 }
+      )
+    }
+
+    // Upload to Cloudinary with timeout and proper error handling
+    const uploadPromise = new Promise<{ secure_url: string }>((resolve, reject) => {
+      // Set up a timeout to prevent hanging
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Upload timeout: Cloudinary upload took too long'))
+      }, 60000) // 60 second timeout
+
+      try {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'infinity-wave/inventory', resource_type: 'image' },
+          (err, result) => {
+            clearTimeout(timeoutId) // Clear timeout on completion
+            
+            if (err) {
+              console.error('Cloudinary upload error:', err)
+              console.error('Error message:', err.message)
+              console.error('Error http_code:', err.http_code)
+              
+              // Format the error message properly
+              let errorMsg = err.message || 'Upload failed'
+              if (typeof err.message === 'object') {
+                errorMsg = JSON.stringify(err.message)
+              }
+              
+              reject(new Error(errorMsg))
+              return
+            }
+            
+            if (!result?.secure_url) {
+              reject(new Error('No URL returned from Cloudinary'))
+              return
+            }
+            
+            resolve({ secure_url: result.secure_url })
+          }
+        )
+        
+        // Handle stream errors
+        stream.on('error', (streamError: any) => {
+          clearTimeout(timeoutId)
+          console.error('Stream error:', streamError)
+          reject(new Error(`Stream error: ${streamError?.message || 'Unknown stream error'}`))
+        })
+        
+        // End the stream with buffer
+        stream.end(buffer)
+        
+      } catch (streamError: any) {
+        clearTimeout(timeoutId)
+        console.error('Stream creation error:', streamError)
+        reject(new Error(`Stream creation failed: ${streamError?.message || 'Unknown error'}`))
+      }
+    })
+
+    const uploaded = await uploadPromise
+
+    return NextResponse.json({ url: uploaded.secure_url })
+  } catch (e: any) {
+    console.error('Upload error caught:', e)
+    console.error('Error message:', e?.message)
+    console.error('Error name:', e?.name)
+    console.error('Error http_code:', e?.http_code)
+    
+    // Format error message properly
+    let errorMessage = 'Upload failed'
+    if (e?.message) {
+      errorMessage = typeof e.message === 'string' ? e.message : JSON.stringify(e.message)
+    }
+    
+    const statusCode = e?.http_code === 401 ? 401 : (e?.http_code || 500)
+    
+    return NextResponse.json(
+      { 
+        error: errorMessage, 
+        details: e?.http_code === 401
+          ? 'Invalid Cloudinary credentials. Please check your CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables in your production environment (Vercel).' 
+          : (e?.http_code ? `Cloudinary error (${e.http_code}): ${errorMessage}` : `Upload failed: ${errorMessage}`)
+      },
+      { status: statusCode }
+    )
+  }
+}
+
+export async function POST(request: Request) {
+  // Wrap EVERYTHING in try-catch to prevent HTML error pages and unhandled rejections
+  try {
+    const response = await handleUpload(request)
+    // Add CORS headers for production
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.set('Content-Type', 'application/json')
+    return response
+  } catch (e: any) {
+    // Final safety net - ensure we ALWAYS return JSON and catch unhandled rejections
+    console.error('CRITICAL: Error in POST route handler:', e)
+    console.error('Error type:', typeof e)
+    console.error('Error message:', e?.message)
+    
+    // Format error message
+    let errorDetails = 'An unexpected error occurred during upload'
+    if (e?.message) {
+      errorDetails = typeof e.message === 'string' ? e.message : JSON.stringify(e.message)
+    }
+    
+    const response = NextResponse.json(
+      { 
+        error: 'Internal server error',
+        details: errorDetails,
+        type: e?.name || 'UnknownError'
+      },
+      { status: 500 }
+    )
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Content-Type', 'application/json')
+    return response
+  }
+}
+
+// Handle CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
+
