@@ -78,64 +78,71 @@ export function PayrollLetterClient() {
   }, [])
 
   return (
-    <div className="space-y-3 print:space-y-0 md:space-y-6">
+    <div className="space-y-2 print:space-y-0 sm:space-y-3 md:space-y-6">
       <style dangerouslySetInnerHTML={{ __html: PRINT_STYLE }} />
 
-      <div className="rounded-lg border border-border/60 bg-card/50 p-3 print:hidden sm:p-4">
-        <p className="text-xs text-muted-foreground sm:text-sm">
+      <div className="rounded-md border border-border/60 bg-card/50 p-2.5 print:hidden sm:rounded-lg sm:p-4">
+        <p className="hidden text-xs text-muted-foreground sm:block sm:text-sm">
           One row per employee. <strong className="text-foreground">Print</strong> matches this preview.
         </p>
-        <div className="mt-3 grid gap-3 sm:mt-4 sm:grid-cols-2 sm:gap-4">
-          <div className="space-y-1.5 sm:space-y-2">
-            <Label htmlFor={`${baseId}-ref`} className="text-xs sm:text-sm">
-              Reference (optional)
+        <div className="grid grid-cols-2 gap-2 sm:mt-3 sm:gap-4">
+          <div className="space-y-1 sm:space-y-2">
+            <Label htmlFor={`${baseId}-ref`} className="text-[11px] sm:text-sm">
+              Reference
             </Label>
             <Input
               id={`${baseId}-ref`}
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              placeholder="e.g. March 2026 batch"
-              className="h-9 text-sm sm:h-10"
+              placeholder="Optional note"
+              className="h-8 text-xs sm:h-10 sm:text-sm"
             />
           </div>
-          <div className="space-y-1.5 sm:space-y-2">
-            <Label htmlFor={`${baseId}-date`} className="text-xs sm:text-sm">
-              Date on letter
+          <div className="space-y-1 sm:space-y-2">
+            <Label htmlFor={`${baseId}-date`} className="text-[11px] sm:text-sm">
+              Date
             </Label>
             <Input
               id={`${baseId}-date`}
               type="date"
               value={payDate}
               onChange={(e) => setPayDate(e.target.value)}
-              className="h-9 sm:h-10"
+              className="h-8 text-xs sm:h-10"
             />
           </div>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2">
-          <Button type="button" variant="outline" size="sm" asChild className="h-9 gap-1.5 text-xs sm:h-10 sm:gap-2 sm:text-sm">
-            <Link href="/finance">
-              <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              Finance
+        <div className="mt-2 grid grid-cols-3 gap-1.5 sm:mt-3 sm:flex sm:flex-wrap sm:gap-2">
+          <Button type="button" variant="outline" size="sm" asChild className="h-8 gap-0.5 px-1.5 text-[10px] sm:h-10 sm:gap-2 sm:px-3 sm:text-sm">
+            <Link href="/finance" className="flex min-w-0 items-center justify-center">
+              <ArrowLeft className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
+              <span className="truncate">Finance</span>
             </Link>
           </Button>
-          <Button type="button" onClick={addRow} variant="secondary" size="sm" className="h-9 text-xs sm:h-10 sm:text-sm">
-            <Plus className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            Add row
+          <Button type="button" onClick={addRow} variant="secondary" size="sm" className="h-8 px-1 text-[10px] sm:h-10 sm:px-3 sm:text-sm">
+            <Plus className="mr-0.5 h-3 w-3 sm:mr-1 sm:h-4 sm:w-4" />
+            Row
           </Button>
-          <Button type="button" onClick={print} size="sm" className="col-span-2 h-9 gap-1.5 text-xs sm:col-span-1 sm:h-10 sm:text-sm">
-            <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            Print / PDF
+          <Button
+            type="button"
+            onClick={print}
+            size="sm"
+            className="h-8 gap-0.5 px-1.5 text-[10px] sm:h-10 sm:gap-2 sm:px-3 sm:text-sm"
+          >
+            <Printer className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="truncate">PDF</span>
           </Button>
         </div>
-        <p className="mt-2 text-[10px] text-muted-foreground sm:mt-3 sm:text-xs">
-          Tip: Print → turn off <strong>Headers and footers</strong>.
+        <p className="mt-1.5 text-[10px] leading-tight text-muted-foreground sm:mt-3 sm:text-xs">
+          Print dialog → off <strong>Headers &amp; footers</strong>
         </p>
       </div>
 
-      <div
-        id="print-area"
-        className="payroll-sheet relative mx-auto w-full max-w-[210mm] overflow-hidden bg-white text-foreground print:max-w-none"
-      >
+      {/* Wider preview on mobile (cancels page horizontal padding); print unchanged */}
+      <div className="-mx-2 w-[calc(100%+1rem)] overflow-x-auto overflow-y-visible print:m-0 print:w-full print:max-w-none print:overflow-visible sm:mx-0 sm:w-full">
+        <div
+          id="print-area"
+          className="payroll-sheet relative mx-auto w-full min-w-0 max-w-[210mm] overflow-hidden bg-white text-foreground print:max-w-none"
+        >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={JOINING_LETTER_BG_PATH}
@@ -145,24 +152,35 @@ export function PayrollLetterClient() {
 
         <div className="payroll-letter-overlay relative z-[1] flex min-h-0 flex-col md:min-h-[297mm]">
           <div
-            className="no-break flex flex-col gap-2 rounded-sm px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            className="no-break flex flex-col gap-1 rounded-sm px-2 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:px-4 sm:py-3"
             style={{ backgroundColor: "#1E293B" }}
           >
-            <p className="text-center text-sm font-bold tracking-wide text-white sm:text-left">PAYROLL / TRANSFER LIST</p>
-            <p className="text-center text-xs text-white/90 tabular-nums sm:text-right">{payDate}</p>
+            <p className="text-center text-[10px] font-bold uppercase leading-tight tracking-wide text-white sm:text-left sm:text-sm">
+              PAYROLL / TRANSFER LIST
+            </p>
+            <p className="text-center text-[10px] text-white/90 tabular-nums sm:text-right sm:text-xs">{payDate}</p>
           </div>
 
           {reference.trim() ? (
-            <p className="mt-3 text-sm font-medium text-[#0f172a]">{reference.trim()}</p>
+            <p className="mt-2 text-xs font-medium text-[#0f172a] sm:mt-3 sm:text-sm">{reference.trim()}</p>
           ) : null}
 
-          <div className="no-break mt-4 overflow-x-auto rounded-lg border border-slate-200 bg-slate-50/80">
-            <table className="w-full min-w-[280px] border-collapse text-left text-xs sm:text-sm">
+          <div className="no-break mt-2 overflow-x-auto rounded-md border border-slate-200 bg-slate-50/80 sm:mt-4 sm:rounded-lg">
+            <table className="w-full min-w-[272px] border-collapse text-left text-[10px] sm:min-w-[280px] sm:text-sm">
               <thead>
                 <tr style={{ backgroundColor: "#1E293B" }}>
-                  <th className="px-3 py-2.5 font-semibold text-white">Employee</th>
-                  <th className="px-3 py-2.5 text-right font-semibold tabular-nums text-white">Amount (Rs)</th>
-                  <th className="px-3 py-2.5 font-semibold text-white">Account no.</th>
+                  <th className="px-1.5 py-1.5 font-semibold text-white sm:px-3 sm:py-2.5">
+                    <span className="inline sm:hidden print:hidden">Name</span>
+                    <span className="hidden sm:inline print:inline">Employee</span>
+                  </th>
+                  <th className="px-1.5 py-1.5 text-right font-semibold tabular-nums text-white sm:px-3 sm:py-2.5">
+                    <span className="inline sm:hidden print:hidden">Amt</span>
+                    <span className="hidden sm:inline print:inline">Amount (Rs)</span>
+                  </th>
+                  <th className="px-1.5 py-1.5 font-semibold text-white sm:px-3 sm:py-2.5">
+                    <span className="inline sm:hidden print:hidden">Acct</span>
+                    <span className="hidden sm:inline print:inline">Account no.</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -172,49 +190,49 @@ export function PayrollLetterClient() {
                     className="border-b border-slate-200 align-top"
                     style={{ backgroundColor: i % 2 === 0 ? "#ffffff" : "#f8fafc" }}
                   >
-                    <td className="px-3 py-2">
+                    <td className="px-1.5 py-1 sm:px-3 sm:py-2">
                       <span className="payroll-print-value font-medium text-[#0f172a]">
                         {row.employeeName.trim() || "—"}
                       </span>
                       <Input
-                        className="payroll-screen-input mt-1 h-8 text-xs sm:h-9 sm:text-sm"
+                        className="payroll-screen-input mt-0.5 h-7 text-[10px] sm:mt-1 sm:h-9 sm:text-sm"
                         value={row.employeeName}
                         onChange={(e) => update(row.id, { employeeName: e.target.value })}
                         placeholder="Name"
                       />
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">
+                    <td className="px-1.5 py-1 text-right tabular-nums sm:px-3 sm:py-2">
                       <span className="payroll-print-value text-[#0f172a]">{formatRsDisplay(row.amount)}</span>
                       <Input
-                        className="payroll-screen-input mt-1 h-8 text-right text-xs sm:h-9 sm:text-sm"
+                        className="payroll-screen-input mt-0.5 h-7 text-right text-[10px] sm:mt-1 sm:h-9 sm:text-sm"
                         inputMode="decimal"
                         value={row.amount}
                         onChange={(e) => update(row.id, { amount: e.target.value })}
                         placeholder="0"
                       />
                     </td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-start gap-1">
+                    <td className="px-1.5 py-1 sm:px-3 sm:py-2">
+                      <div className="flex items-start gap-0.5 sm:gap-1">
                         <div className="min-w-0 flex-1">
-                          <span className="payroll-print-value font-mono text-xs text-[#0f172a] break-all whitespace-pre-wrap">
+                          <span className="payroll-print-value font-mono text-[10px] text-[#0f172a] break-all whitespace-pre-wrap sm:text-xs">
                             {row.account.trim() || "—"}
                           </span>
                           <Input
-                            className="payroll-screen-input mt-1 h-8 font-mono text-xs sm:h-9 sm:text-sm"
+                            className="payroll-screen-input mt-0.5 h-7 font-mono text-[10px] sm:mt-1 sm:h-9 sm:text-sm"
                             value={row.account}
                             onChange={(e) => update(row.id, { account: e.target.value })}
-                            placeholder="IBAN / account"
+                            placeholder="IBAN"
                           />
                         </div>
                         <Button
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 shrink-0 print:hidden"
+                          className="h-7 w-7 shrink-0 print:hidden sm:h-8 sm:w-8"
                           onClick={() => removeRow(row.id)}
                           aria-label="Remove row"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         </Button>
                       </div>
                     </td>
@@ -226,21 +244,22 @@ export function PayrollLetterClient() {
                   className="font-semibold"
                   style={{ backgroundColor: "#F97316", color: "#ffffff" }}
                 >
-                  <td className="px-3 py-2.5">Total</td>
-                  <td className="px-3 py-2.5 text-right tabular-nums">
+                  <td className="px-1.5 py-2 text-[10px] sm:px-3 sm:py-2.5 sm:text-sm">Total</td>
+                  <td className="px-1.5 py-2 text-right text-[10px] tabular-nums sm:px-3 sm:py-2.5 sm:text-sm">
                     Rs{" "}
                     {total.toLocaleString(undefined, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 2,
                     })}
                   </td>
-                  <td className="px-3 py-2.5" />
+                  <td className="px-1.5 py-2 sm:px-3 sm:py-2.5" />
                 </tr>
               </tfoot>
             </table>
           </div>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground">Payroll transfer list</p>
+          <p className="mt-3 text-center text-[10px] text-muted-foreground sm:mt-6 sm:text-xs">Payroll transfer list</p>
+        </div>
         </div>
       </div>
     </div>

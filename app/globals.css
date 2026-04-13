@@ -161,10 +161,11 @@
   }
   .payroll-letter-overlay {
     box-sizing: border-box;
-    padding-top: 11%;
-    padding-bottom: 4%;
-    padding-left: 3%;
-    padding-right: 3%;
+    /* Tighter than tablet so logo + table show without huge top gap */
+    padding-top: 6%;
+    padding-bottom: 3%;
+    padding-left: 2%;
+    padding-right: 2%;
     min-height: 0;
   }
 }
