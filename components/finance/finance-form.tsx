@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -9,17 +9,27 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FinanceTransaction } from "@/types"
+import {
+  categoriesForType,
+  getCategoryLabel,
+  UNCATEGORIZED_VALUE,
+} from "@/lib/finance-categories"
+import {
+  shouldAutoSuggestCategory,
+  suggestFinanceCategory,
+} from "@/lib/finance-auto-category"
 
-const financeSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  type: z.enum(["INCOME", "EXPENSE"]),
-  amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Must be a positive number"),
-  date: z.string().min(1, "Date is required"),
-  description: z.string().optional(),
-  receiptUrl: z.string().optional(),
-})
-
-type FinanceFormData = z.infer<typeof financeSchema>
+type FinanceFormData = {
+  title: string
+  type: "INCOME" | "EXPENSE"
+  amount: string
+  date: string
+  description?: string
+  category: string
+  receiptUrl?: string
+  salaryEmployeeName: string
+  salaryBankAccount: string
+}
 
 interface FinanceFormProps {
   transaction?: FinanceTransaction
@@ -33,15 +43,46 @@ export function FinanceForm({ transaction, defaultType, onSuccess }: FinanceForm
   const [error, setError] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(transaction?.receiptUrl || null)
+  const [autoCategoryHint, setAutoCategoryHint] = useState<string | null>(null)
 
   // Get today's date in YYYY-MM-DD format for default value
   const todayDate = new Date().toISOString().split("T")[0]
+
+  const financeSchema = useMemo(
+    () =>
+      z
+        .object({
+          title: z.string().min(1, "Title is required"),
+          type: z.enum(["INCOME", "EXPENSE"]),
+          amount: z
+            .string()
+            .refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Must be a positive number"),
+          date: z.string().min(1, "Date is required"),
+          description: z.string().optional(),
+          category: z.string().trim().min(1, "Category is required"),
+          receiptUrl: z.string().optional(),
+          salaryEmployeeName: z.string().optional(),
+          salaryBankAccount: z.string().optional(),
+        })
+        .superRefine((data, ctx) => {
+          if (transaction) return
+          if (data.category === UNCATEGORIZED_VALUE) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Choose a category (not “Uncategorized”) for new entries.",
+              path: ["category"],
+            })
+          }
+        }),
+    [transaction]
+  )
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<FinanceFormData>({
     resolver: zodResolver(financeSchema),
     defaultValues: transaction
@@ -51,14 +92,66 @@ export function FinanceForm({ transaction, defaultType, onSuccess }: FinanceForm
           amount: transaction.amount.toString(),
           date: new Date(transaction.date).toISOString().split("T")[0],
           description: transaction.description || "",
+          category: (transaction?.category?.trim() || UNCATEGORIZED_VALUE) as string,
+          salaryEmployeeName:
+            (transaction as { salaryEmployeeName?: string | null }).salaryEmployeeName ?? "",
+          salaryBankAccount:
+            (transaction as { salaryBankAccount?: string | null }).salaryBankAccount ?? "",
         }
       : {
           type: defaultType || "EXPENSE",
-          date: todayDate, // Set default date to today
+          date: todayDate,
+          category: "",
+          salaryEmployeeName: "",
+          salaryBankAccount: "",
         },
   })
 
-  const type = watch("type")
+  const watchType = watch("type")
+  const categorySelectOptions = useMemo(() => {
+    const list = categoriesForType(watchType === "EXPENSE" ? "EXPENSE" : "INCOME")
+    if (transaction) return list
+    return list.filter((c) => c.value !== UNCATEGORIZED_VALUE)
+  }, [watchType, transaction])
+  const watchTitle = watch("title") ?? ""
+  const watchDescription = watch("description") ?? ""
+  const watchCategory = watch("category") ?? ""
+  const isSalaryExpense = watchCategory === "salaries" && watchType === "EXPENSE"
+
+  const typeFirstRender = useRef(true)
+  useEffect(() => {
+    if (typeFirstRender.current) {
+      typeFirstRender.current = false
+      return
+    }
+    setValue("category", transaction ? UNCATEGORIZED_VALUE : "")
+    setAutoCategoryHint(null)
+  }, [watchType, setValue, transaction])
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      if (!shouldAutoSuggestCategory(watchCategory)) return
+      const next = suggestFinanceCategory(watchType, watchTitle, watchDescription)
+      if (next) {
+        setValue("category", next, { shouldDirty: true, shouldValidate: true })
+        setAutoCategoryHint(
+          `Auto-picked “${getCategoryLabel(next)}” from title / description — change if needed.`
+        )
+      } else {
+        setAutoCategoryHint(null)
+      }
+    }, 420)
+    return () => window.clearTimeout(id)
+  }, [watchTitle, watchDescription, watchType, watchCategory, setValue])
+
+  useEffect(() => {
+    if (!isSalaryExpense) {
+      setValue("salaryEmployeeName", "")
+      setValue("salaryBankAccount", "")
+    }
+  }, [isSalaryExpense, setValue])
+
+  const categoryField = register("category")
 
   const onSubmit = async (data: FinanceFormData) => {
     setLoading(true)
@@ -87,10 +180,16 @@ export function FinanceForm({ transaction, defaultType, onSuccess }: FinanceForm
         receiptUrl = uj.url
       }
 
+      const salaryExpenseRow =
+        data.type === "EXPENSE" && data.category.trim() === "salaries"
+
       const payload = {
         ...data,
         amount: parseFloat(data.amount),
         receiptUrl,
+        category: data.category.trim(),
+        salaryEmployeeName: salaryExpenseRow ? data.salaryEmployeeName?.trim() || null : null,
+        salaryBankAccount: salaryExpenseRow ? data.salaryBankAccount?.trim() || null : null,
       }
 
       const url = transaction ? `/api/finance/${transaction.id}` : "/api/finance"
@@ -198,6 +297,69 @@ export function FinanceForm({ transaction, defaultType, onSuccess }: FinanceForm
           />
         </div>
         <div className="space-y-2 md:col-span-2 2xl:col-span-3">
+          <Label>Category *</Label>
+          <p className="text-xs text-muted-foreground">
+            {transaction
+              ? "Pick how this entry is grouped in reports."
+              : "Required for every new entry — pick a category, or let title/description auto-suggest one (Uncategorized is not allowed for new rows)."}
+          </p>
+          <select
+            {...categoryField}
+            onChange={(e) => {
+              categoryField.onChange(e)
+              setAutoCategoryHint(null)
+            }}
+            className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
+          >
+            {!transaction && (
+              <option value="" disabled>
+                Select a category…
+              </option>
+            )}
+            {categorySelectOptions.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+          {autoCategoryHint && (
+            <p className="text-xs text-emerald-700/90 dark:text-emerald-400/90">{autoCategoryHint}</p>
+          )}
+          {errors.category && (
+            <p className="text-sm text-destructive">{errors.category.message}</p>
+          )}
+        </div>
+        {isSalaryExpense && (
+          <div className="space-y-3 rounded-lg border border-primary/25 bg-primary/[0.04] p-4 md:col-span-2 2xl:col-span-3">
+            <p className="text-sm font-medium text-foreground">Salary slip details</p>
+            <p className="text-xs text-muted-foreground">
+              Used on the printable slip (company letterhead). After saving, open the transaction and use{" "}
+              <strong>Print salary slip</strong>.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="salaryEmployeeName">Employee name (for slip)</Label>
+                <Input
+                  id="salaryEmployeeName"
+                  {...register("salaryEmployeeName")}
+                  placeholder="As it should appear on the slip"
+                  autoComplete="name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="salaryBankAccount">Bank / account number (optional)</Label>
+                <Input
+                  id="salaryBankAccount"
+                  {...register("salaryBankAccount")}
+                  placeholder="IBAN or account no."
+                  className="font-mono text-sm"
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="space-y-2 md:col-span-2 2xl:col-span-3">
           <Label htmlFor="receipt">Receipt/Evidence (optional)</Label>
           <input id="receipt" type="file" accept="image/*" onChange={(e) => {
             const f = e.target.files?.[0] || null
@@ -223,5 +385,4 @@ export function FinanceForm({ transaction, defaultType, onSuccess }: FinanceForm
     </form>
   )
 }
-
 

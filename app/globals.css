@@ -66,7 +66,24 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* Buttons/links: faster taps on touch without breaking page wheel/trackpad scroll on body */
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  /* iOS safe areas (notch / home indicator) */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
   }
 }
 
@@ -82,10 +99,61 @@
   animation: gradient-x 18s ease infinite;
 }
 
+/* Payroll letter: hide print-only text on screen */
+@media screen {
+  .payroll-print-value {
+    display: none !important;
+  }
+}
+
 /* Floating blur blobs */
 .blob {
   filter: blur(60px);
   opacity: 0.35;
+}
+
+/* Print / Save as PDF: hide app chrome is handled via print:hidden on layout; this sets paper + background */
+@media print {
+  @page {
+    margin: 0;
+    size: A4 portrait;
+  }
+  html,
+  body {
+    background: white !important;
+  }
+  #nprogress,
+  #nprogress .bar,
+  #nprogress .peg,
+  #nprogress .spinner {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Payroll letter: one A4 sheet — clip letterhead SVG (prevents random page 2 / split signature) */
+  .payroll-letter-root {
+    height: 297mm !important;
+    max-height: 297mm !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    break-inside: avoid !important;
+  }
+  .payroll-letter-root img {
+    object-fit: cover !important;
+    object-position: top center !important;
+  }
+  /* Chrome sometimes ignores Tailwind print: — force screen inputs off, print text on */
+  .payroll-letter-root .payroll-screen-input {
+    display: none !important;
+  }
+  .payroll-letter-root .payroll-print-value {
+    display: block !important;
+    visibility: visible !important;
+  }
+  .payroll-letter-root table {
+    font-size: 10pt;
+  }
 }
 
 

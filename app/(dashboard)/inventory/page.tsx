@@ -3,9 +3,8 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus } from "lucide-react"
-import { InventoryTable } from "@/components/inventory/inventory-table"
+import { InventoryDashboard } from "@/components/inventory/inventory-dashboard"
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +49,15 @@ export default async function InventoryPage() {
     updatedAt: it.updatedAt.toISOString(),
   }))
 
+  const categoryTabs = Array.from(
+    new Map(
+      categories.map((c) => {
+        const label = c.category.trim()
+        return [label.toLowerCase(), label] as const
+      })
+    ).values()
+  ).sort((a, b) => a.localeCompare(b))
+
   return (
     <div className="space-y-6 max-w-7xl 2xl:max-w-[1800px] mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -65,14 +73,7 @@ export default async function InventoryPage() {
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Inventory Items</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <InventoryTable items={plainItems as any} categories={categories.map(c => c.category)} />
-        </CardContent>
-      </Card>
+      <InventoryDashboard items={plainItems as any} categories={categoryTabs} />
     </div>
   )
 }

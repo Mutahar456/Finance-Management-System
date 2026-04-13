@@ -93,6 +93,7 @@ model User {
   assignedBy           ProjectAssignment[]          @relation("AssignmentCreator")
   notifications        Notification[]
   createdInvoices      Invoice[]                @relation("InvoiceCreator")
+  recurringExpenseTemplates RecurringExpenseTemplate[]
 }
 
 model InventoryItem {
@@ -122,16 +123,46 @@ model FinanceTransaction {
   amount      Decimal   @db.Decimal(10, 2)
   date        DateTime
   description String?   @db.Text
+  category    String?
   receiptUrl  String?   @db.Text
+  /// When category is salaries — shown on the printable salary slip.
+  salaryEmployeeName  String?
+  salaryBankAccount   String?
   userId      String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  recurringSourceId String?
+  recurringSource   RecurringExpenseTemplate? @relation(fields: [recurringSourceId], references: [id], onDelete: SetNull)
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([type])
   @@index([date])
+  @@index([recurringSourceId])
+}
+
+/// Saved monthly expense (rent, salaries, etc.) — post to the ledger with one click per month.
+model RecurringExpenseTemplate {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?  @db.Text
+  category     String
+  amount       Decimal  @db.Decimal(10, 2)
+  /// Optional monthly allocation cap for budget tracking; if null, `amount` is used as the planned budget.
+  monthlyBudgetAmount Decimal? @db.Decimal(10, 2)
+  dayOfMonth   Int
+  isActive     Boolean  @default(true)
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions FinanceTransaction[]
+
+  @@index([userId])
+  @@index([isActive])
 }
 
 model Project {

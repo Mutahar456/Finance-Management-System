@@ -2,12 +2,25 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { X, Download, Check, Smartphone } from "lucide-react"
+import { X, Download, Check } from "lucide-react"
 import { LOGO_URL } from "@/lib/branding"
+
+const STORAGE_KEY = "pwa-install-dismissed"
+const DISMISS_DAYS = 7
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>
+}
+
+function isDismissedWithinWindow(): boolean {
+  if (typeof window === "undefined") return false
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (!raw) return false
+  const dismissedTime = parseInt(raw, 10)
+  if (Number.isNaN(dismissedTime)) return false
+  const days = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24)
+  return days < DISMISS_DAYS
 }
 
 export function InstallPrompt() {
@@ -17,57 +30,49 @@ export function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false)
 
   useEffect(() => {
-    // Check if app is already installed
+    if (typeof window === "undefined") return
+
     if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true)
       return
     }
 
-    // Detect iOS
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream)
+    const ios =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+    setIsIOS(ios)
 
-    // For testing: allow showing on localhost even if dismissed
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    
-    // Check if user has already dismissed the prompt (stored in localStorage)
-    // Skip this check on localhost for easier testing
-    if (!isLocalhost) {
-      const dismissed = localStorage.getItem("pwa-install-dismissed")
-      if (dismissed) {
-        const dismissedTime = parseInt(dismissed, 10)
-        const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24)
-        
-        // Show again after 7 days
-        if (daysSinceDismissed < 7) {
-          return
-        }
-      }
+    if (isDismissedWithinWindow()) {
+      return
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
+      if (isDismissedWithinWindow()) return
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setShowPrompt(true)
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
 
-    // Show prompt after delay - works on localhost, production, iOS, etc.
-    const timer = setTimeout(() => {
-      const isProduction = window.location.protocol === 'https:' || 
-                          window.location.hostname.includes('vercel.app')
-      
-      // Show on localhost, production, iOS, or if we have deferredPrompt
-      if (isLocalhost || isProduction || isIOS || deferredPrompt) {
+    const timer = window.setTimeout(() => {
+      if (isDismissedWithinWindow()) return
+      const isLocalhost =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+      const isProduction =
+        window.location.protocol === "https:" ||
+        window.location.hostname.includes("vercel.app")
+
+      if (isLocalhost || isProduction || ios) {
         setShowPrompt(true)
       }
-    }, 2000) // Reduced to 2 seconds for faster visibility
+    }, 2000)
 
     return () => {
       clearTimeout(timer)
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
     }
-  }, [isIOS, deferredPrompt])
+  }, [])
 
   const handleInstall = async () => {
     if (deferredPrompt) {
@@ -81,38 +86,37 @@ export function InstallPrompt() {
 
       setDeferredPrompt(null)
     } else if (isIOS) {
-      alert("To install on iOS:\n\n1. Tap the Share button (square with arrow up)\n2. Scroll down and tap 'Add to Home Screen'\n3. Tap 'Add'")
+      alert(
+        "To install on iOS:\n\n1. Tap the Share button (square with arrow up)\n2. Scroll down and tap 'Add to Home Screen'\n3. Tap 'Add'"
+      )
     }
   }
 
   const handleDismiss = () => {
     setShowPrompt(false)
-    localStorage.setItem("pwa-install-dismissed", Date.now().toString())
+    localStorage.setItem(STORAGE_KEY, Date.now().toString())
   }
 
-  if (isInstalled || !showPrompt) {
+  if (isInstalled || !showPrompt || isDismissedWithinWindow()) {
     return null
   }
 
-  // Show on localhost (for testing), production (HTTPS), or if we have deferredPrompt or on iOS/Android
-  const isLocalhost = typeof window !== 'undefined' && (
-    window.location.hostname === 'localhost' || 
-    window.location.hostname === '127.0.0.1'
-  )
-  const isProduction = typeof window !== 'undefined' && (
-    window.location.protocol === 'https:' || 
-    window.location.hostname.includes('vercel.app')
-  )
-  
-  // Show if: localhost (testing), production, has deferredPrompt, or iOS
+  const isLocalhost =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1")
+  const isProduction =
+    typeof window !== "undefined" &&
+    (window.location.protocol === "https:" ||
+      window.location.hostname.includes("vercel.app"))
+
   if (!isLocalhost && !deferredPrompt && !isIOS && !isProduction) {
     return null
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-80 animate-in slide-in-from-bottom-5 fade-in-0">
+    <div className="fixed bottom-6 right-6 z-50 w-80 animate-in slide-in-from-bottom-5 fade-in-0 print:hidden">
       <div className="rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 p-5 shadow-2xl text-white">
-        {/* Header */}
         <div className="flex items-start gap-3 mb-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
             <img src={LOGO_URL} alt="Infinity Wave" className="w-8 h-8" />
@@ -131,7 +135,6 @@ export function InstallPrompt() {
           </Button>
         </div>
 
-        {/* Features */}
         <div className="space-y-2 mb-5">
           <div className="flex items-center gap-2 text-sm">
             <Check className="h-4 w-4 text-green-300 flex-shrink-0" />
@@ -147,7 +150,6 @@ export function InstallPrompt() {
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -171,7 +173,6 @@ export function InstallPrompt() {
   )
 }
 
-// Export a component for Navbar/Sidebar to show install button
 export function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(false)
@@ -179,28 +180,28 @@ export function InstallButton() {
   const [showButton, setShowButton] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === "undefined") return
 
     if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true)
       return
     }
 
+    if (isDismissedWithinWindow()) return
+
     setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream)
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
+      if (isDismissedWithinWindow()) return
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setShowButton(true)
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
 
-    // Wait a bit to see if beforeinstallprompt fires
-    // If it doesn't, the browser likely has its own install button
     const timer = setTimeout(() => {
-      // Only show our button if we have deferredPrompt or on iOS
-      // Otherwise, let the browser handle it natively
+      if (isDismissedWithinWindow()) return
       if (deferredPrompt || isIOS) {
         setShowButton(true)
       }
@@ -214,7 +215,6 @@ export function InstallButton() {
 
   const handleInstall = async () => {
     if (deferredPrompt) {
-      // Use native browser prompt
       deferredPrompt.prompt()
       const { outcome } = await deferredPrompt.userChoice
       if (outcome === "accepted") {
@@ -222,37 +222,24 @@ export function InstallButton() {
       }
       setDeferredPrompt(null)
     } else if (isIOS) {
-      // iOS doesn't support beforeinstallprompt, show helpful message
-      const message = "To install on iOS:\n\n1. Tap the Share button (square with arrow up)\n2. Scroll down and tap 'Add to Home Screen'\n3. Tap 'Add' in the top right"
+      const message =
+        "To install on iOS:\n\n1. Tap the Share button (square with arrow up)\n2. Scroll down and tap 'Add to Home Screen'\n3. Tap 'Add' in the top right"
       alert(message)
     }
-    // If no deferredPrompt and not iOS, the browser should handle it
-    // (user can use the browser's install button in toolbar)
   }
 
-  if (isInstalled || !showButton) {
+  if (isInstalled || !showButton || isDismissedWithinWindow()) {
     return null
   }
 
-  // Only show button if we have deferredPrompt (native install available) or iOS
-  // On desktop browsers without deferredPrompt, the browser's own install button is better
   if (!deferredPrompt && !isIOS) {
     return null
   }
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleInstall}
-      className="gap-2"
-    >
+    <Button variant="outline" size="sm" onClick={handleInstall} className="gap-2">
       <Download className="h-4 w-4" />
       Install App
     </Button>
   )
 }
-
-
-
-

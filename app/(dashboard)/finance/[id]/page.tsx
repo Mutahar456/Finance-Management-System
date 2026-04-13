@@ -1,9 +1,12 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { FinanceForm } from "@/components/finance/finance-form"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { FileText } from "lucide-react"
 
 export default async function FinanceTransactionPage({
   params,
@@ -64,11 +67,23 @@ export default async function FinanceTransactionPage({
     )
   }
 
+  const isSalaryExpense = transaction.type === "EXPENSE" && transaction.category === "salaries"
+
   return (
     <div className="space-y-6 max-w-7xl 2xl:max-w-[1800px] mx-auto">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">{transaction.title}</h1>
-        <p className="text-sm md:text-base text-muted-foreground">View transaction details</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">{transaction.title}</h1>
+          <p className="text-sm md:text-base text-muted-foreground">View transaction details</p>
+        </div>
+        {isSalaryExpense && (
+          <Button asChild className="gap-2 shrink-0">
+            <Link href={`/finance/salary-slip/${transaction.id}`}>
+              <FileText className="h-4 w-4" />
+              Print salary slip
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
@@ -112,6 +127,26 @@ export default async function FinanceTransactionPage({
                   <p className="text-sm font-medium text-muted-foreground">Description</p>
                   <p className="text-base md:text-lg">{transaction.description}</p>
                 </div>
+              )}
+              {isSalaryExpense && (
+                <>
+                  {(transaction as { salaryEmployeeName?: string | null }).salaryEmployeeName && (
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Employee (slip)</p>
+                      <p className="text-base md:text-lg">
+                        {(transaction as { salaryEmployeeName?: string | null }).salaryEmployeeName}
+                      </p>
+                    </div>
+                  )}
+                  {(transaction as { salaryBankAccount?: string | null }).salaryBankAccount && (
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Account no.</p>
+                      <p className="font-mono text-base md:text-lg">
+                        {(transaction as { salaryBankAccount?: string | null }).salaryBankAccount}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </CardContent>

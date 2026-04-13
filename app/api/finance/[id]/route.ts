@@ -3,16 +3,8 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createActivityLog } from "@/actions/activity-log"
 import { ActionType, Module } from "@prisma/client"
-import { z } from "zod"
-
-const financeSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  type: z.enum(["INCOME", "EXPENSE"]),
-  amount: z.number().positive("Amount must be positive"),
-  date: z.string(),
-  description: z.string().optional(),
-  receiptUrl: z.string().optional(),
-})
+import { ZodError } from "zod"
+import { financeBodySchema } from "@/app/api/finance/schema"
 
 export async function PUT(
   request: Request,
@@ -40,9 +32,9 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const validatedData = financeSchema.parse({
+    const validatedData = financeBodySchema.parse({
       ...body,
-      amount: parseFloat(body.amount),
+      amount: typeof body.amount === "number" ? body.amount : parseFloat(body.amount),
     })
 
     const transaction = await prisma.financeTransaction.update({
@@ -54,6 +46,9 @@ export async function PUT(
         date: new Date(validatedData.date),
         description: validatedData.description || null,
         receiptUrl: validatedData.receiptUrl ?? existingTransaction.receiptUrl,
+        category: validatedData.category,
+        salaryEmployeeName: validatedData.salaryEmployeeName?.trim() || null,
+        salaryBankAccount: validatedData.salaryBankAccount?.trim() || null,
       },
     })
 
@@ -70,7 +65,7 @@ export async function PUT(
 
     return NextResponse.json(transaction)
   } catch (error) {
-    if (error instanceof z.ZodError) {
+    if (error instanceof ZodError) {
       return NextResponse.json(
         { error: error.errors[0].message },
         { status: 400 }
