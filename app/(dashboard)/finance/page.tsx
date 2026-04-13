@@ -160,99 +160,102 @@ export default async function FinancePage() {
   }))
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 pb-6 2xl:max-w-[1800px]">
+    <div className="mx-auto max-w-7xl space-y-5 pb-4 md:space-y-8 md:pb-6 2xl:max-w-[1800px]">
       {/* Hero + primary actions */}
-      <div className="flex flex-col gap-6 border-b border-border/60 pb-8 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 space-y-2">
-          <h1 className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl md:text-4xl">
+      <div className="flex flex-col gap-3 border-b border-border/60 pb-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6 sm:pb-7">
+        <div className="min-w-0 space-y-1 sm:space-y-2">
+          <h1 className="text-balance text-xl font-semibold tracking-tight text-foreground sm:text-3xl md:text-4xl">
             Finance
           </h1>
-          <p className="max-w-2xl text-pretty text-sm text-muted-foreground sm:text-base">
+          <p className="max-w-2xl text-pretty text-xs text-muted-foreground sm:hidden">
+            This month · charts · ledger. Use buttons for income, expense, bills, payroll.
+          </p>
+          <p className="hidden max-w-2xl text-pretty text-sm text-muted-foreground sm:block md:text-base">
             This month at a glance, then charts, then every transaction.{" "}
             <span className="text-foreground/90">One-time entries:</span> Add Income / Add Expense.{" "}
             <span className="text-foreground/90">Recurring bills:</span> Monthly bills.
           </p>
         </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[280px] sm:max-w-md">
+        <div className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:min-w-[260px] sm:max-w-md sm:grid-cols-1">
           <Link href="/finance/income" className="w-full">
-            <Button variant="outline" size="lg" className="h-11 w-full gap-2 shadow-sm">
-              <Plus className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="h-9 w-full gap-1.5 px-2 text-xs shadow-sm sm:h-10 sm:gap-2 sm:text-sm">
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Add income
             </Button>
           </Link>
           <Link href="/finance/expense" className="w-full">
-            <Button size="lg" className="h-11 w-full gap-2 shadow-sm">
-              <Plus className="h-4 w-4" />
+            <Button size="sm" className="h-9 w-full gap-1.5 px-2 text-xs shadow-sm sm:h-10 sm:gap-2 sm:text-sm">
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Add expense
             </Button>
           </Link>
-          <Link href="/finance/recurring" className="w-full">
-            <Button variant="secondary" size="lg" className="h-11 w-full gap-2 shadow-sm">
-              <CalendarClock className="h-4 w-4" />
-              Monthly bills &amp; budget
+          <Link href="/finance/recurring" className="col-span-2 w-full sm:col-span-1">
+            <Button variant="secondary" size="sm" className="h-9 w-full gap-1.5 px-2 text-xs shadow-sm sm:h-10 sm:gap-2 sm:text-sm">
+              <CalendarClock className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+              Monthly bills
             </Button>
           </Link>
-          <Link href="/finance/payroll-letter" className="w-full">
-            <Button variant="outline" size="lg" className="h-11 w-full gap-2 shadow-sm">
-              <ScrollText className="h-4 w-4" />
-              Payroll letter (letterhead)
+          <Link href="/finance/payroll-letter" className="col-span-2 w-full sm:col-span-1">
+            <Button variant="outline" size="sm" className="h-9 w-full gap-1.5 px-2 text-xs shadow-sm sm:h-10 sm:gap-2 sm:text-sm">
+              <ScrollText className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+              Payroll letter
             </Button>
           </Link>
         </div>
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-4">
         <Card className="overflow-hidden border-border/80 shadow-sm">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 p-3 pb-1.5 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
               Income (this month)
             </CardTitle>
-            <div className="rounded-lg bg-emerald-500/10 p-2">
-              <TrendingUp className="h-4 w-4 text-emerald-500" strokeWidth={2.25} />
+            <div className="rounded-md bg-emerald-500/10 p-1.5 sm:rounded-lg sm:p-2">
+              <TrendingUp className="h-3.5 w-3.5 text-emerald-500 sm:h-4 sm:w-4" strokeWidth={2.25} />
             </div>
           </CardHeader>
-          <CardContent className="space-y-1">
-            <div className="text-2xl font-semibold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-500">
+          <CardContent className="space-y-0.5 px-3 pb-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-lg font-semibold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-500 sm:text-2xl">
               Rs {incomeThis.toLocaleString()}
             </div>
-            <p className="text-xs font-medium text-muted-foreground">{incomeMom}</p>
-            <p className="text-xs text-muted-foreground/90">
+            <p className="text-[10px] font-medium text-muted-foreground sm:text-xs">{incomeMom}</p>
+            <p className="text-[10px] text-muted-foreground/90 sm:text-xs">
               All-time: Rs {totalIncomeLife.toLocaleString()}
             </p>
           </CardContent>
         </Card>
 
         <Card className="overflow-hidden border-border/80 shadow-sm">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 p-3 pb-1.5 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
               Expenses (this month)
             </CardTitle>
-            <div className="rounded-lg bg-red-500/10 p-2">
-              <TrendingDown className="h-4 w-4 text-red-500" strokeWidth={2.25} />
+            <div className="rounded-md bg-red-500/10 p-1.5 sm:rounded-lg sm:p-2">
+              <TrendingDown className="h-3.5 w-3.5 text-red-500 sm:h-4 sm:w-4" strokeWidth={2.25} />
             </div>
           </CardHeader>
-          <CardContent className="space-y-1">
-            <div className="text-2xl font-semibold tabular-nums tracking-tight text-red-600 dark:text-red-500">
+          <CardContent className="space-y-0.5 px-3 pb-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-lg font-semibold tabular-nums tracking-tight text-red-600 dark:text-red-500 sm:text-2xl">
               Rs {expenseThis.toLocaleString()}
             </div>
-            <p className="text-xs font-medium text-muted-foreground">{expenseMom}</p>
-            <p className="text-xs text-muted-foreground/90">
+            <p className="text-[10px] font-medium text-muted-foreground sm:text-xs">{expenseMom}</p>
+            <p className="text-[10px] text-muted-foreground/90 sm:text-xs">
               All-time: Rs {totalExpensesLife.toLocaleString()}
             </p>
           </CardContent>
         </Card>
 
         <Card className="overflow-hidden border-border/80 shadow-sm">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Net (this month)</CardTitle>
-            <div className="rounded-lg bg-blue-500/10 p-2">
-              <Wallet className="h-4 w-4 text-blue-500" strokeWidth={2.25} />
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 p-3 pb-1.5 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">Net (this month)</CardTitle>
+            <div className="rounded-md bg-blue-500/10 p-1.5 sm:rounded-lg sm:p-2">
+              <Wallet className="h-3.5 w-3.5 text-blue-500 sm:h-4 sm:w-4" strokeWidth={2.25} />
             </div>
           </CardHeader>
-          <CardContent className="space-y-1">
+          <CardContent className="space-y-0.5 px-3 pb-3 pt-0 sm:p-6 sm:pt-0">
             <div
-              className={`text-2xl font-semibold tabular-nums tracking-tight ${
+              className={`text-lg font-semibold tabular-nums tracking-tight sm:text-2xl ${
                 netThis >= 0
                   ? "text-emerald-600 dark:text-emerald-500"
                   : "text-red-600 dark:text-red-500"
@@ -260,8 +263,8 @@ export default async function FinancePage() {
             >
               Rs {netThis.toLocaleString()}
             </div>
-            <p className="text-xs font-medium text-muted-foreground">{netMom}</p>
-            <p className="text-xs text-muted-foreground/90">
+            <p className="text-[10px] font-medium text-muted-foreground sm:text-xs">{netMom}</p>
+            <p className="text-[10px] text-muted-foreground/90 sm:text-xs">
               All-time net: Rs {balanceLife.toLocaleString()}
             </p>
           </CardContent>
@@ -269,17 +272,20 @@ export default async function FinancePage() {
       </div>
 
       {/* Charts section */}
-      <section className="space-y-4" aria-labelledby="finance-charts-heading">
+      <section className="space-y-3 md:space-y-4" aria-labelledby="finance-charts-heading">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-start gap-2">
-            <BarChart3 className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
+            <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" aria-hidden />
             <div>
-              <h2 id="finance-charts-heading" className="text-lg font-semibold tracking-tight sm:text-xl">
+              <h2 id="finance-charts-heading" className="text-base font-semibold tracking-tight sm:text-lg md:text-xl">
                 Charts
               </h2>
-              <p className="mt-0.5 max-w-3xl text-sm text-muted-foreground">
-                Green bars = income, orange = expenses by month. Blue area = net cash movement over the last
-                30 days (filtered list below does not change these charts).
+              <p className="mt-0.5 max-w-3xl text-xs text-muted-foreground sm:text-sm">
+                <span className="sm:hidden">Income / expense bars · net (30d).</span>
+                <span className="hidden sm:inline">
+                  Green bars = income, orange = expenses by month. Blue area = net cash movement over the last
+                  30 days (filtered list below does not change these charts).
+                </span>
               </p>
             </div>
           </div>
@@ -288,29 +294,32 @@ export default async function FinancePage() {
       </section>
 
       {/* Transactions */}
-      <section className="space-y-4" aria-labelledby="finance-tx-heading">
+      <section className="space-y-3 md:space-y-4" aria-labelledby="finance-tx-heading">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-start gap-2">
-            <List className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
+            <List className="mt-0.5 h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" aria-hidden />
             <div>
-              <h2 id="finance-tx-heading" className="text-lg font-semibold tracking-tight sm:text-xl">
+              <h2 id="finance-tx-heading" className="text-base font-semibold tracking-tight sm:text-lg md:text-xl">
                 All transactions
               </h2>
-              <p className="mt-0.5 max-w-3xl text-sm text-muted-foreground">
-                Filter by type, category, or date range. Running balance is computed in date order for the
-                filtered rows. Use the pencil to edit or trash to delete.
+              <p className="mt-0.5 max-w-3xl text-xs text-muted-foreground sm:text-sm">
+                <span className="sm:hidden">Filter · balance updates with sort order.</span>
+                <span className="hidden sm:inline">
+                  Filter by type, category, or date range. Running balance is computed in date order for the
+                  filtered rows. Use the pencil to edit or trash to delete.
+                </span>
               </p>
             </div>
           </div>
         </div>
         <Card className="border-border/80 shadow-md">
-          <CardHeader className="border-b border-border/50 bg-muted/15 pb-4">
-            <CardTitle className="text-base font-semibold sm:text-lg">Ledger</CardTitle>
-            <CardDescription className="text-sm">
-              Scroll horizontally on smaller screens if columns don&apos;t fit. Swipe or use the scrollbar.
+          <CardHeader className="border-b border-border/50 bg-muted/15 p-4 pb-3 sm:pb-4">
+            <CardTitle className="text-sm font-semibold sm:text-base md:text-lg">Ledger</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              Scroll sideways on small screens if columns don&apos;t fit.
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-3 pt-5 sm:p-6">
+          <CardContent className="p-2 pt-4 sm:p-6">
             <FinanceTable transactions={plainTransactions as any} />
           </CardContent>
         </Card>

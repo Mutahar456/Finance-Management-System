@@ -11,3 +11,14 @@ export const SLIP_CONTENT_INSET = {
   paddingRight: "8%",
   paddingBottom: "10%",
 } as const
+
+/**
+ * Payroll letter padding is defined in `app/globals.css` (`.payroll-letter-overlay` + print rules)
+ * so screen / mobile / print can differ. Kept name for search; use CSS classes in UI.
+ */
+export const PAYROLL_LETTER_CONTENT_INSET = {
+  paddingTop: "26%",
+  paddingLeft: "8%",
+  paddingRight: "8%",
+  paddingBottom: "6%",
+} as const

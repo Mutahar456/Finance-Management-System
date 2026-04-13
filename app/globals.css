@@ -130,29 +130,55 @@
     visibility: hidden !important;
   }
 
-  /* Payroll letter: one A4 sheet — clip letterhead SVG (prevents random page 2 / split signature) */
-  .payroll-letter-root {
-    height: 297mm !important;
-    max-height: 297mm !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-    page-break-after: avoid !important;
-    break-inside: avoid !important;
-  }
-  .payroll-letter-root img {
-    object-fit: cover !important;
-    object-position: top center !important;
-  }
-  /* Chrome sometimes ignores Tailwind print: — force screen inputs off, print text on */
-  .payroll-letter-root .payroll-screen-input {
+  /* Payroll #print-area: force print values vs inputs */
+  #print-area .payroll-screen-input {
     display: none !important;
   }
-  .payroll-letter-root .payroll-print-value {
-    display: block !important;
+  #print-area .payroll-print-value {
+    display: inline-block !important;
     visibility: visible !important;
   }
-  .payroll-letter-root table {
+  #print-area table {
     font-size: 10pt;
+  }
+
+  /* Payroll: full A4 letterhead spacing when printing */
+  .payroll-letter-overlay {
+    padding-top: 26% !important;
+    padding-bottom: 6% !important;
+    padding-left: 8% !important;
+    padding-right: 8% !important;
+  }
+  #print-area.payroll-sheet {
+    min-height: 297mm !important;
+  }
+}
+
+/* Payroll letter: screen preview — tight top on small phones so letterhead art + table stay visible */
+@media screen and (max-width: 767px) {
+  #print-area.payroll-sheet {
+    min-height: 0;
+  }
+  .payroll-letter-overlay {
+    box-sizing: border-box;
+    padding-top: 11%;
+    padding-bottom: 4%;
+    padding-left: 3%;
+    padding-right: 3%;
+    min-height: 0;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .payroll-letter-overlay {
+    box-sizing: border-box;
+    padding-top: 26%;
+    padding-bottom: 6%;
+    padding-left: 8%;
+    padding-right: 8%;
+  }
+  #print-area.payroll-sheet {
+    min-height: 297mm;
   }
 }
 

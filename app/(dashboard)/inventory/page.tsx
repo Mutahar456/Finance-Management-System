@@ -59,16 +59,16 @@ export default async function InventoryPage() {
   ).sort((a, b) => a.localeCompare(b))
 
   return (
-    <div className="space-y-6 max-w-7xl 2xl:max-w-[1800px] mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Inventory Management</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Manage your inventory items</p>
+    <div className="mx-auto max-w-7xl space-y-4 2xl:max-w-[1800px] md:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="space-y-0.5">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">Inventory</h1>
+          <p className="text-xs text-muted-foreground sm:text-sm md:text-base">Stock, value &amp; categories</p>
         </div>
-        <Link href="/inventory/new">
-          <Button className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Item
+        <Link href="/inventory/new" className="w-full sm:w-auto">
+          <Button size="sm" className="h-9 w-full gap-1.5 sm:h-10 sm:w-auto">
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            Add item
           </Button>
         </Link>
       </div>

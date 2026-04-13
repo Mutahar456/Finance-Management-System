@@ -29,7 +29,7 @@ export default function DashboardLayout({
           onMenuClick={() => setIsMobileMenuOpen(true)}
         />
         {/* min-h-0 is required so flex gives this pane a bounded height; without it wheel/trackpad scroll often breaks */}
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3 pb-safe print:overflow-visible print:bg-white print:p-0 sm:p-4 md:p-6 lg:p-8 [-webkit-overflow-scrolling:touch]">
+        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-safe pt-2.5 print:overflow-visible print:bg-white print:p-0 sm:p-4 sm:pt-4 md:p-6 lg:p-8 [-webkit-overflow-scrolling:touch]">
           <Suspense
             fallback={
               <div className="animate-pulse space-y-4">

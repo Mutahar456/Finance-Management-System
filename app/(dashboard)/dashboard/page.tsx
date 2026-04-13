@@ -194,15 +194,15 @@ export default async function DashboardPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 2xl:max-w-[1800px]">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Dashboard</h1>
-        <p className="text-muted-foreground">
+    <div className="mx-auto max-w-7xl space-y-4 md:space-y-8 2xl:max-w-[1800px]">
+      <div className="space-y-0.5 md:space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl md:text-3xl">Dashboard</h1>
+        <p className="text-sm text-muted-foreground md:text-base">
           Welcome back, <span className="font-medium text-foreground">{session.user?.name}</span>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 lg:gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
@@ -210,17 +210,21 @@ export default async function DashboardPage() {
               key={stat.title}
               className="border-border/60 shadow-sm transition-shadow hover:shadow-md"
             >
-              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium leading-snug text-muted-foreground">
+              <CardHeader className="flex flex-row items-start justify-between space-y-0 p-3 pb-1.5 sm:p-6 sm:pb-2">
+                <CardTitle className="text-[11px] font-medium leading-tight text-muted-foreground sm:text-sm sm:leading-snug">
                   {stat.title}
                 </CardTitle>
-                <div className={`rounded-lg p-2 ${stat.iconBg}`}>
-                  <Icon className="h-4 w-4" />
+                <div className={`rounded-md p-1.5 sm:rounded-lg sm:p-2 ${stat.iconBg}`}>
+                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-semibold tracking-tight tabular-nums">{stat.value}</div>
-                <p className="mt-1 text-xs text-muted-foreground">{stat.description}</p>
+              <CardContent className="px-3 pb-3 pt-0 sm:p-6 sm:pt-0">
+                <div className="text-base font-semibold leading-tight tracking-tight tabular-nums sm:text-2xl">
+                  {stat.value}
+                </div>
+                <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground sm:mt-1 sm:text-xs">
+                  {stat.description}
+                </p>
               </CardContent>
             </Card>
           )
@@ -239,34 +243,34 @@ export default async function DashboardPage() {
         />
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-6">
         <Card className="border-border/60 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Recent activity</CardTitle>
-            <CardDescription>Latest changes across modules</CardDescription>
+          <CardHeader className="space-y-0.5 p-4 pb-2 sm:p-6 sm:pb-3">
+            <CardTitle className="text-base sm:text-lg">Recent activity</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Latest changes across modules</CardDescription>
           </CardHeader>
           <CardContent className="p-0 sm:p-6 sm:pt-0">
             {recent.length === 0 ? (
-              <p className="px-6 pb-6 text-sm text-muted-foreground sm:px-0">No activity yet.</p>
+              <p className="px-4 pb-4 text-sm text-muted-foreground sm:px-0 sm:pb-6">No activity yet.</p>
             ) : (
               <ul className="divide-y divide-border/60">
                 {recent.map((log) => (
                   <li
                     key={log.id}
-                    className="px-4 py-3 transition-colors first:pt-0 hover:bg-muted/30 sm:px-0"
+                    className="px-3 py-2.5 transition-colors first:pt-0 hover:bg-muted/30 sm:px-0 sm:py-3"
                   >
-                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-1">
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">
                         {log.module} · {log.actionType}
                       </span>
-                      <time className="text-xs tabular-nums text-muted-foreground">
+                      <time className="text-[10px] tabular-nums text-muted-foreground sm:text-xs">
                         {new Date(log.timestamp as Date).toLocaleString()}
                       </time>
                     </div>
-                    <p className="mt-1.5 text-sm leading-relaxed text-foreground">
+                    <p className="mt-1 text-xs leading-snug text-foreground sm:text-sm sm:leading-relaxed">
                       {log.description || "—"}
                     </p>
-                    <p className="mt-1 text-xs text-muted-foreground">{log.user?.name}</p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground sm:mt-1 sm:text-xs">{log.user?.name}</p>
                   </li>
                 ))}
               </ul>
@@ -275,35 +279,35 @@ export default async function DashboardPage() {
         </Card>
 
         <Card className="border-border/60 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Quick actions</CardTitle>
-            <CardDescription>Shortcuts to common workflows</CardDescription>
+          <CardHeader className="space-y-0.5 p-4 pb-2 sm:p-6 sm:pb-3">
+            <CardTitle className="text-base sm:text-lg">Quick actions</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Shortcuts to common workflows</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Button asChild className="w-full justify-center gap-1 shadow-sm">
+          <CardContent className="space-y-2 p-4 pt-0 sm:space-y-3 sm:p-6 sm:pt-0">
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-2 sm:gap-2">
+              <Button asChild size="sm" className="h-9 w-full justify-center gap-1 px-2 text-xs shadow-sm sm:h-10 sm:text-sm">
                 <Link href="/projects/new">
                   New project
-                  <ArrowUpRight className="h-3.5 w-3.5 opacity-70" />
+                  <ArrowUpRight className="h-3 w-3 opacity-70 sm:h-3.5 sm:w-3.5" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-center">
+              <Button asChild variant="outline" size="sm" className="h-9 w-full justify-center px-2 text-xs sm:h-10 sm:text-sm">
                 <Link href="/inventory/new">Add inventory</Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-center">
+              <Button asChild variant="outline" size="sm" className="h-9 w-full justify-center px-2 text-xs sm:h-10 sm:text-sm">
                 <Link href="/finance/income">Add income</Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-center">
+              <Button asChild variant="outline" size="sm" className="h-9 w-full justify-center px-2 text-xs sm:h-10 sm:text-sm">
                 <Link href="/finance/expense">Add expense</Link>
               </Button>
             </div>
-            <Button asChild variant="secondary" className="w-full shadow-sm">
+            <Button asChild variant="secondary" size="sm" className="h-9 w-full text-xs shadow-sm sm:h-10 sm:text-sm">
               <Link href="/finance/recurring">Monthly bills &amp; budget</Link>
             </Button>
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline" size="sm" className="h-9 w-full text-xs sm:h-10 sm:text-sm">
               <Link href="/finance">Finance overview</Link>
             </Button>
-            <Button asChild variant="ghost" className="w-full text-muted-foreground">
+            <Button asChild variant="ghost" size="sm" className="h-8 w-full text-xs text-muted-foreground sm:h-9 sm:text-sm">
               <Link href="/logs">View activity logs</Link>
             </Button>
           </CardContent>

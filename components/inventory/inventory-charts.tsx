@@ -59,24 +59,24 @@ export function InventoryCharts({ items }: { items: ChartItem[] }) {
 
   if (items.length === 0) {
     return (
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
         <Card className="border-border/60 bg-card/50 shadow-lg shadow-black/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="p-4 pb-2 sm:p-6">
+            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
               Category mix
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+          <CardContent className="flex h-[160px] items-center justify-center px-4 pb-4 text-xs text-muted-foreground sm:h-[220px] sm:text-sm">
             Add items to see distribution
           </CardContent>
         </Card>
         <Card className="border-border/60 bg-card/50 shadow-lg shadow-black/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="p-4 pb-2 sm:p-6">
+            <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
               Value by category
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+          <CardContent className="flex h-[160px] items-center justify-center px-4 pb-4 text-xs text-muted-foreground sm:h-[220px] sm:text-sm">
             Add items to see values
           </CardContent>
         </Card>
@@ -85,17 +85,17 @@ export function InventoryCharts({ items }: { items: ChartItem[] }) {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
       <Card className="border-border/60 bg-card/50 shadow-lg shadow-black/20 transition-shadow hover:shadow-xl hover:shadow-black/25">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold tracking-tight">
+        <CardHeader className="p-4 pb-1 sm:p-6 sm:pb-2">
+          <CardTitle className="text-sm font-semibold tracking-tight sm:text-base">
             Category distribution
           </CardTitle>
-          <p className="text-xs text-muted-foreground">Items per category</p>
+          <p className="text-[11px] text-muted-foreground sm:text-xs">Items per category</p>
         </CardHeader>
-        <CardContent className="pt-0">
-          {/* Fixed pixel height: percentage + flex parents often resolve to 0 → blank charts */}
-          <ResponsiveContainer width="100%" height={248}>
+        <CardContent className="h-[200px] pt-0 sm:h-[248px]">
+          {/* Fixed height parent so ResponsiveContainer resolves */}
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={pieData}
@@ -103,8 +103,8 @@ export function InventoryCharts({ items }: { items: ChartItem[] }) {
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                innerRadius={52}
-                outerRadius={88}
+                innerRadius={46}
+                outerRadius={80}
                 paddingAngle={2}
                 stroke="hsl(var(--background))"
                 strokeWidth={2}
@@ -131,14 +131,14 @@ export function InventoryCharts({ items }: { items: ChartItem[] }) {
       </Card>
 
       <Card className="border-border/60 bg-card/50 shadow-lg shadow-black/20 transition-shadow hover:shadow-xl hover:shadow-black/25">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold tracking-tight">
+        <CardHeader className="p-4 pb-1 sm:p-6 sm:pb-2">
+          <CardTitle className="text-sm font-semibold tracking-tight sm:text-base">
             Inventory value
           </CardTitle>
-          <p className="text-xs text-muted-foreground">Total value by category (Rs)</p>
+          <p className="text-[11px] text-muted-foreground sm:text-xs">Total value by category (Rs)</p>
         </CardHeader>
-        <CardContent className="pt-0">
-          <ResponsiveContainer width="100%" height={248}>
+        <CardContent className="h-[200px] pt-0 sm:h-[248px]">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={barData} margin={{ top: 8, right: 8, left: 4, bottom: 4 }}>
               <XAxis
                 dataKey="name"

@@ -176,51 +176,51 @@ export function InventoryDashboard({ items: initialItems, categories }: Inventor
     url.includes("cloudinary.com") || url.startsWith("http://")
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
+    <div className="space-y-4 md:space-y-6">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4">
         <Card className="border-border/60 bg-card/60 shadow-lg shadow-black/15 transition-all duration-200 hover:border-border hover:shadow-xl hover:shadow-black/20">
-          <CardContent className="flex items-start gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary ring-1 ring-primary/20">
-              <Wallet className="h-5 w-5" />
+          <CardContent className="flex items-start gap-2 p-3 sm:gap-4 sm:p-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary ring-1 ring-primary/20 sm:h-11 sm:w-11 sm:rounded-xl">
+              <Wallet className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div className="min-w-0 space-y-0.5">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Total inventory value
+            <div className="min-w-0 space-y-0">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs sm:tracking-wider">
+                Total value
               </p>
-              <p className="text-2xl font-semibold tracking-tight tabular-nums">
+              <p className="text-sm font-semibold leading-tight tracking-tight tabular-nums sm:text-2xl">
                 {formatCurrency(stats.totalValue)}
               </p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-border/60 bg-card/60 shadow-lg shadow-black/15 transition-all duration-200 hover:border-border hover:shadow-xl hover:shadow-black/20">
-          <CardContent className="flex items-start gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/12 text-sky-400 ring-1 ring-sky-500/20">
-              <Package className="h-5 w-5" />
+          <CardContent className="flex items-start gap-2 p-3 sm:gap-4 sm:p-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/12 text-sky-400 ring-1 ring-sky-500/20 sm:h-11 sm:w-11 sm:rounded-xl">
+              <Package className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div className="min-w-0 space-y-0.5">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <div className="min-w-0 space-y-0">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs sm:tracking-wider">
                 Total items
               </p>
-              <p className="text-2xl font-semibold tracking-tight tabular-nums">
+              <p className="text-sm font-semibold leading-tight tracking-tight tabular-nums sm:text-2xl">
                 {stats.totalItems}
               </p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/60 bg-card/60 shadow-lg shadow-black/15 transition-all duration-200 hover:border-border hover:shadow-xl hover:shadow-black/20">
-          <CardContent className="flex items-start gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/12 text-amber-400 ring-1 ring-amber-500/25">
-              <AlertTriangle className="h-5 w-5" />
+        <Card className="col-span-2 border-border/60 bg-card/60 shadow-lg shadow-black/15 transition-all duration-200 hover:border-border hover:shadow-xl hover:shadow-black/20 sm:col-span-1">
+          <CardContent className="flex items-start gap-2 p-3 sm:gap-4 sm:p-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/12 text-amber-400 ring-1 ring-amber-500/25 sm:h-11 sm:w-11 sm:rounded-xl">
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div className="min-w-0 space-y-0.5">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Low stock items
+            <div className="min-w-0 space-y-0">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs sm:tracking-wider">
+                Low stock
               </p>
-              <p className="text-2xl font-semibold tracking-tight tabular-nums text-amber-400/95">
+              <p className="text-sm font-semibold leading-tight tracking-tight tabular-nums text-amber-400/95 sm:text-2xl">
                 {stats.lowStock}
               </p>
-              <p className="text-[11px] text-muted-foreground">Qty 1–{LOW_STOCK_MAX}</p>
+              <p className="text-[10px] text-muted-foreground sm:text-[11px]">Qty 1–{LOW_STOCK_MAX}</p>
             </div>
           </CardContent>
         </Card>
@@ -229,23 +229,24 @@ export function InventoryDashboard({ items: initialItems, categories }: Inventor
       <InventoryCharts items={chartItems} />
 
       <Card className="border-border/60 bg-card/50 shadow-lg shadow-black/20">
-        <CardHeader className="space-y-4 pb-4">
+        <CardHeader className="space-y-3 p-4 pb-3 sm:space-y-4 sm:p-6 sm:pb-4">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-lg font-semibold tracking-tight">Inventory items</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Search and filter in real time. Stock status reflects quantity thresholds.
+              <CardTitle className="text-base font-semibold tracking-tight sm:text-lg">Inventory items</CardTitle>
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                <span className="sm:hidden">Search &amp; filter · stock status by qty.</span>
+                <span className="hidden sm:inline">Search and filter in real time. Stock status reflects quantity thresholds.</span>
               </p>
             </div>
           </div>
 
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground sm:left-3 sm:h-4 sm:w-4" />
             <Input
-              placeholder="Search by name, supplier, or category..."
+              placeholder="Search name, supplier, category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-11 rounded-xl border-border/80 bg-background/50 pl-10 shadow-sm transition-colors focus-visible:ring-primary/30"
+              className="h-9 rounded-lg border-border/80 bg-background/50 pl-9 text-sm shadow-sm transition-colors focus-visible:ring-primary/30 sm:h-11 sm:rounded-xl sm:pl-10"
             />
           </div>
 

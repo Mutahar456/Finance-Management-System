@@ -35,7 +35,7 @@ export default async function SalarySlipPage({ params }: { params: { id: string 
 
   return (
     <div className="mx-auto max-w-[220mm] px-3 py-6 print:max-w-none print:p-0">
-      <SalarySlipPrintToolbar backHref={`/finance/${transaction.id}`} />
+      <SalarySlipPrintToolbar fallbackHref="/finance" />
       <SalarySlipDocument
         employeeName={(transaction as { salaryEmployeeName?: string | null }).salaryEmployeeName ?? null}
         bankAccount={(transaction as { salaryBankAccount?: string | null }).salaryBankAccount ?? null}

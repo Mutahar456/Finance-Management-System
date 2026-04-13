@@ -3,10 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import jsPDF from "jspdf"
 import { getCategoryLabel } from "@/lib/finance-categories"
-import {
-  drawSalarySlipOnPdf,
-  tryLoadLetterheadPngDataUrl,
-} from "@/lib/finance-salary-slip-pdf"
+import { drawSalarySlipOnPdf, tryLoadLetterheadPngDataUrl } from "@/lib/finance-salary-slip-pdf"
 
 async function fetchAsDataUrl(url: string) {
   try {
@@ -55,9 +52,9 @@ export async function GET(
   }
 
   if (transaction.type === "EXPENSE" && transaction.category === "salaries") {
-    const letterhead = await tryLoadLetterheadPngDataUrl()
     const doc = new jsPDF({ unit: "pt", format: "a4" })
     const userName = session.user?.name || "User"
+    const letterhead = await tryLoadLetterheadPngDataUrl()
     drawSalarySlipOnPdf(doc, transaction, letterhead, userName)
     const safeEmp = (
       (transaction as { salaryEmployeeName?: string | null }).salaryEmployeeName?.trim() ||
